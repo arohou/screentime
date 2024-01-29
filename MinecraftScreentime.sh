@@ -24,6 +24,11 @@ MC_ROOT="$HOME/Library/Application Support/minecraft"
 # You shouldn't need to edit anything beyond this point
 #
 
+# If the environment variable DEBUG is set, then enable debugging
+if [ -n "$DEBUG" ]; then
+    set -x
+fi
+
 # Convert screentime limit to seconds
 SCEENTIME_LIMIT_SECONDS=$((SCEENTIME_LIMIT_MINUTES * 60))
 
