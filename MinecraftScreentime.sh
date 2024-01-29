@@ -104,7 +104,7 @@ if [ "$SCEENTIME_LIMIT_SECONDS" -gt 0 ] && [ -n "$MC_PID" ]; then
         fi
         msg="Minecraft will be terminated in about $MINUTES_LEFT minute$plural"
         # Display a notification
-        osascript -e "display dialog "$msg" buttons \"OK\" default button 1 with title \"Minecraft\" with icon caution"
+        osascript -e "display dialog \"$msg\" buttons \"OK\" default button 1 with title \"Minecraft\" with icon caution"
     fi
 
     # If we are less than 1 minute away from the limit, wait until the limit 
