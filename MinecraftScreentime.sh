@@ -14,7 +14,7 @@
 # This is the number of minutes that you want to allow your child to play Minecraft
 # before Minecraft is automatically terminated.
 # If you don't want to set a limit, set this to 0
-SCEENTIME_LIMIT_MINUTES=60
+SCREENTIME_LIMIT_MINUTES=60
 
 # Where are the minecraft files installed?
 MC_ROOT="$HOME/Library/Application Support/minecraft"
@@ -30,7 +30,7 @@ if [ -n "$DEBUG" ]; then
 fi
 
 # Convert screentime limit to seconds
-SCEENTIME_LIMIT_SECONDS=$((SCEENTIME_LIMIT_MINUTES * 60))
+SCREENTIME_LIMIT_SECONDS=$((SCREENTIME_LIMIT_MINUTES * 60))
 
 # This script only works on MacOS. If on another OS, crash out with an error
 if [ "$(uname)" != "Darwin" ]; then
@@ -83,20 +83,20 @@ fi
 
 # If the screentime log file exists, get the total time spent on Minecraft today
 # by adding the time spent on each java minecraft process
-TOTAL_SCEENTIME=0
+TOTAL_SCREENTIME=0
 if [ -f "$MC_SCREENTIME_LOG" ]; then
-    TOTAL_SCEENTIME=$(awk '{ sum += $2 } END { print sum }' "$MC_SCREENTIME_LOG")
+    TOTAL_SCREENTIME=$(awk '{ sum += $2 } END { print sum }' "$MC_SCREENTIME_LOG")
 fi
 
 # If the screentime limit is greater than zero, and Minecraft is running, we may need to act
-if [ "$SCEENTIME_LIMIT_SECONDS" -gt 0 ] && [ -n "$MC_PID" ]; then
+if [ "$SCREENTIME_LIMIT_SECONDS" -gt 0 ] && [ -n "$MC_PID" ]; then
     # Work out how many seconds are left
-    SECONDS_LEFT=$(( SCEENTIME_LIMIT_SECONDS - TOTAL_SCEENTIME ))
+    SECONDS_LEFT=$(( SCREENTIME_LIMIT_SECONDS - TOTAL_SCREENTIME ))
 
     # If we are less than 5, but more than 1 minute away from the limit, display a notification
     if [ "$SECONDS_LEFT" -lt 300 ] && [ "$SECONDS_LEFT" -gt 60 ]; then
         # Work out how many minutes are left
-        MINUTES_LEFT=$(( (SCEENTIME_LIMIT_SECONDS - TOTAL_SCEENTIME) / 60 ))
+        MINUTES_LEFT=$(( (SCREENTIME_LIMIT_SECONDS - TOTAL_SCREENTIME) / 60 ))
         # Is it 1 minute or more?
         plural=""
         if [ "$MINUTES_LEFT" -gt 1 ]; then
@@ -120,7 +120,7 @@ if [ "$SCEENTIME_LIMIT_SECONDS" -gt 0 ] && [ -n "$MC_PID" ]; then
 
     # If the total screentime is greater than the limit, kill the Minecraft process
     # and display a notification
-    if [ "$TOTAL_SCEENTIME" -gt "$SCEENTIME_LIMIT_SECONDS" ]; then
+    if [ "$TOTAL_SCREENTIME" -gt "$SCREENTIME_LIMIT_SECONDS" ]; then
         # Kill the java process
         kill -9 $MC_PID
         # Show a popup to explain what happened
