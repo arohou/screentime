@@ -125,7 +125,5 @@ if [ "$SCEENTIME_LIMIT_SECONDS" -gt 0 ] && [ -n "$MC_PID" ]; then
         kill -9 $MC_PID
         # Show a popup to explain what happened
         osascript -e 'display dialog "Minecraft screentime limit exceeded; Minecraft has been terminated" buttons "OK" default button 1 with title "Minecraft" with icon caution' 
-    else
-        
     fi
 fi
