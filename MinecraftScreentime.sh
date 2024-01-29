@@ -88,8 +88,36 @@ if [ -f "$MC_SCREENTIME_LOG" ]; then
     TOTAL_SCEENTIME=$(awk '{ sum += $2 } END { print sum }' "$MC_SCREENTIME_LOG")
 fi
 
-# If the screentime limit is greater than zero, we may need to act
-if [ "$SCEENTIME_LIMIT_SECONDS" -gt 0 ]; then
+# If the screentime limit is greater than zero, and Minecraft is running, we may need to act
+if [ "$SCEENTIME_LIMIT_SECONDS" -gt 0 ] && [ -n "$MC_PID" ]; then
+    # Work out how many seconds are left
+    SECONDS_LEFT=$(( SCEENTIME_LIMIT_SECONDS - TOTAL_SCEENTIME ))
+
+    # If we are less than 5, but more than 1 minute away from the limit, display a notification
+    if [ "$SECONDS_LEFT" -lt 300 ] && [ "$SECONDS_LEFT" -gt 60 ]; then
+        # Work out how many minutes are left
+        MINUTES_LEFT=$(( (SCEENTIME_LIMIT_SECONDS - TOTAL_SCEENTIME) / 60 ))
+        # Is it 1 minute or more?
+        plural=""
+        if [ "$MINUTES_LEFT" -gt 1 ]; then
+            plural="s"
+        fi
+        msg="Minecraft will be terminated in about $MINUTES_LEFT minute$plural"
+        # Display a notification
+        osascript -e "display dialog "$msg" buttons \"OK\" default button 1 with title \"Minecraft\" with icon caution"
+    fi
+
+    # If we are less than 1 minute away from the limit, wait until the limit 
+    # has been reached, then kill the Minecraft process and display a notification
+    if [ "$SECONDS_LEFT" -lt 60 ] && [ "$SECONDS_LEFT" -gt 0 ]; then
+        # Wait until the limit has been reached
+        sleep $SECONDS_LEFT
+        # Kill the java process
+        kill -9 $MC_PID
+        # Show a popup to explain what happened
+        osascript -e 'display dialog "Minecraft screentime limit exceeded; Minecraft has been terminated" buttons "OK" default button 1 with title "Minecraft" with icon caution' 
+    fi
+
     # If the total screentime is greater than the limit, kill the Minecraft process
     # and display a notification
     if [ "$TOTAL_SCEENTIME" -gt "$SCEENTIME_LIMIT_SECONDS" ]; then
@@ -98,18 +126,6 @@ if [ "$SCEENTIME_LIMIT_SECONDS" -gt 0 ]; then
         # Show a popup to explain what happened
         osascript -e 'display dialog "Minecraft screentime limit exceeded; Minecraft has been terminated" buttons "OK" default button 1 with title "Minecraft" with icon caution' 
     else
-        # If we are 5 minutes away from the limit, display a notification
-        if [ "$((SCEENTIME_LIMIT_SECONDS - TOTAL_SCEENTIME))" -lt 300 ]; then
-            # Work out how many minutes are left
-            MINUTES_LEFT=$(( (SCEENTIME_LIMIT_SECONDS - TOTAL_SCEENTIME) / 60 ))
-            # Is it 1 minute or more?
-            plural=""
-            if [ "$MINUTES_LEFT" -gt 1 ]; then
-                plural="s"
-            fi
-            # Display a notification
-            #osascript -e "display notification \"Minecraft screentime limit in $MINUTES_LEFT minutes\" with title \"Minecraft\""
-            osascript -e "display dialog \"Minecraft will be terminated in $MINUTES_LEFT minute$plural\" buttons \"OK\" default button 1 with title \"Minecraft\" with icon caution"
-        fi
+        
     fi
 fi
