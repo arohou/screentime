@@ -18,11 +18,18 @@ There are two time limits - one for Monday-Thursday, the other for Friday-Sunday
 - Add the following line to the end of the file: `* * * * * /bin/bash /Users/<username>/Documents/git/screentime/MinecraftScreentime.sh`
 - After saving the file, you may get a popup "Terminal would like to administer your computer...". Click Allow.
 3. Grant cron full disk access:
-- Open System Preferences
+- Open System Settings
 - Click Privacy & Security
 - Click Full Disk Access
 - Click the + icon
 - Navigate to /usr/sbin/cron and click Open (hint: you may have to press Command+Shift+. to show hidden files)
+
+To check whether the script can run, you can launch it from the terminal directly
+- navigate to the directory where you installed it (e.g. `cd ~/Documents/git/screentime`)
+- run the script (e.g. `./MinecraftScreentime.sh`)
+
+To check whether the script is run every minute by cron as expected, check the end of the log file:
+`tail -f ~/Library/Application\ Support/minecraft/logs/screentime.log` (to stop `tail`ing the file, use `Ctrl-C`)
 
 ### Time limit configuration
 The script ships with a default configuration file, called `MinecraftScreentime.txt` and located in the same directory as the script. You can edit that file to specify your own time limits, in minutes.
