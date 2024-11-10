@@ -25,10 +25,11 @@ There are two time limits - one for Monday-Thursday, the other for Friday-Sunday
 - Navigate to /usr/sbin/cron and click Open (hint: you may have to press Command+Shift+. to show hidden files)
 
 ### Time limit configuration
-The script ships with a default configuration file, called `MinecraftScreentime.conf` and located in the same directory as the script. You can edit that file to specify your own time limits, in minutes.
-For added convenience, the script will also look for a folder shared on iCloud called `MinecraftScreentimeConfig`. If this is found, and it contains a `MinecraftScreentime.conf` file, the time limits found in that file will take precedence.
+The script ships with a default configuration file, called `MinecraftScreentime.txt` and located in the same directory as the script. You can edit that file to specify your own time limits, in minutes.
+For added convenience, the script will also look for a folder shared on iCloud called `MinecraftScreentimeConfig`. If this is found, and it contains a `MinecraftScreentime.txt` file, the time limits found in that file will take precedence.
 #### Creating a shared configuration file on iCloud
-On your (the parent's) device (preferably a laptop):
+You will need a text editor intalled on your device. For iOS, a good option is EasyEditText, which integrates with Files.
+On your (the parent's) device:
 - In Finder (MacOS) or the Files app (iOS), navigate to iCloud Drive
 - Create a new folder
   - iOS
@@ -42,7 +43,7 @@ On your (the parent's) device (preferably a laptop):
 - Select "Collaborate"
 - Tap on "Only invited people can edit" and change it to "Only invited people" and "View only" (that way your child will not be able to edit the time limit)
 - Invite your child to "collaborate" on this folder (e.g. via Messages)
-- Create a file `MinecraftScreentime.conf` within the folder, and add two lines to specify the limits (in minutes). Should look something like this:
+- Create a file `MinecraftScreentime.txt` within the folder, and add two lines to specify the limits (in minutes). Should look something like this:
 ```
 WEEKDAY_LIMIT_MINUTES=60
 WEEKEND_LIMIT_MINUTES=120

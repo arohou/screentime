@@ -22,8 +22,8 @@ WEEKEND_LIMIT_MINUTES=120  # Friday through Sunday
 
 # Define config file locations
 SCRIPT_DIR="$(dirname "$0")"
-LOCAL_CONFIG_FILE="$SCRIPT_DIR/MinecraftScreentime.conf"
-SHARED_ICLOUD_CONFIG_FILE="$HOME/Library/Mobile Documents/com~apple~CloudDocs/MinecraftScreentimeConfig/MinecraftScreentime.conf"
+LOCAL_CONFIG_FILE="$SCRIPT_DIR/MinecraftScreentime.txt"
+SHARED_ICLOUD_CONFIG_FILE="$HOME/Library/Mobile Documents/com~apple~CloudDocs/MinecraftScreentimeConfig/MinecraftScreentime.txt"
 
 # Other configurations
 MC_ROOT="$HOME/Library/Application Support/minecraft"
