@@ -43,5 +43,7 @@ On your (the parent's) device (preferably a laptop):
 - Tap on "Only invited people can edit" and change it to "Only invited people" and "View only" (that way your child will not be able to edit the time limit)
 - Invite your child to "collaborate" on this folder (e.g. via Messages)
 - Create a file `MinecraftScreentime.conf` within the folder, and add two lines to specify the limits (in minutes). Should look something like this:
-  ```WEEKDAY_LIMIT_MINUTES=60
-WEEKEND_LIMIT_MINUTES=120```
+```
+WEEKDAY_LIMIT_MINUTES=60
+WEEKEND_LIMIT_MINUTES=120
+```
