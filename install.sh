@@ -62,8 +62,8 @@ echo "Press Enter AFTER you have completed these steps..."
 # Open System Settings to the correct location
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
 
-# Wait for user to complete the step
-read -r
+# Flush stdout and wait for user to complete the step
+stty -echo && read -p "" -n 1 && stty echo
 
 echo "==============================================="
 echo "Testing permissions..."
