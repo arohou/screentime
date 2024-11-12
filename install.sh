@@ -48,17 +48,42 @@ chmod 600 "$LAUNCH_AGENT_DIR/com.minecraft.screentime.plist"
 launchctl load "$LAUNCH_AGENT_DIR/com.minecraft.screentime.plist"
 
 # Request Full Disk Access using automation
-echo "Important: We need to grant Full Disk Access to complete the setup."
-echo "System Settings will open automatically. Please follow these steps:"
+echo "==============================================="
+echo "IMPORTANT: Full Disk Access Setup Required"
+echo "==============================================="
+echo "System Settings will now open. Please follow these steps:"
 echo "1. Click the '+' button"
 echo "2. Press Command+Shift+G"
 echo "3. Enter: /bin/bash"
 echo "4. Click 'Open'"
+echo ""
+echo "Press Enter AFTER you have completed these steps..."
 
 # Open System Settings to the correct location
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
 
+# Wait for user to complete the step
+read -r
+
+echo "==============================================="
+echo "Testing permissions..."
+echo "==============================================="
+# Try to read a system file that requires Full Disk Access
+if ! pmset -g log >/dev/null 2>&1; then
+    echo "ERROR: Full Disk Access does not appear to be granted."
+    echo "The script will not work correctly without this permission."
+    echo "Please try the setup steps again."
+    echo ""
+    echo "Press Enter to continue anyway, or Ctrl+C to exit..."
+    read -r
+fi
+
+# Now show the configuration instructions
+echo ""
+echo "==============================================="
 echo "Installation complete!"
+echo "==============================================="
+
 echo ""
 echo "IMPORTANT: Time Limit Configuration"
 echo "------------------------------------"
