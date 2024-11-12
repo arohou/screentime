@@ -57,13 +57,14 @@ echo "2. Press Command+Shift+G"
 echo "3. Enter: /bin/bash"
 echo "4. Click 'Open'"
 echo ""
-echo "Press Enter AFTER you have completed these steps..."
+echo -n "Press Enter AFTER you have completed these steps..."
 
 # Open System Settings to the correct location
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
 
-# Flush stdout and wait for user to complete the step
-stty -echo && read -p "" -n 1 && stty echo
+# Wait for Enter key
+read
+
 
 echo "==============================================="
 echo "Testing permissions..."
