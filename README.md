@@ -2,56 +2,56 @@
 Scripts to better manage screen time on macOS.
 
 ## MinecraftScreentime
-This script is designed to be run as a cron job every minute on MacOS. 
-It checks if Minecraft is running, and if it is, keeps track of how long it's been running. If it's been running for more than the limit you set, it will kill the process and send a notification to the user. It will also send notifications when the user has a few minutes left.
-There are two time limits - one for Monday-Thursday, the other for Friday-Sunday. Both can be specified in a configuration file. For convenience, the configuration file can be in a shared iCloud folder so that time limits can be changed remotely (from an iPhone, say).
+This script runs every minute. 
+It checks if Minecraft is running, and if it is, keeps track of how long it's been running. If Minecraft has run for more than the limit you set, it will kill the process and send a notification to the user. It will also send notifications when the user has a few minutes left.
+There are two time limits - one for Monday-Thursday, the other for Friday-Sunday. Both can be specified in a configuration file, which you will create in a shared iCloud folder so that time limits can be changed remotely (from an iPhone, say).
 
-### Script installation
-1. Download the script and put it somewhere on your computer
-- Open the Terminal application
-- Navigate to a directory of your choice (e.g. `cd ~/Documents; mkdir git; cd git`)
-- Enter the following command to clone the directory: `git clone https://github.com/arohou/screentime.git` (you may have to install the command line development tools first)
-2. Create a cron job to run the script every minute:
-- Open the Terminal application
-- Enter the following command: `crontab -e`
-- If this is your first time using cron, you will be asked to choose a text editor. I recommend nano.
-- Add the following line to the end of the file: `* * * * * /bin/bash /Users/<username>/Documents/git/screentime/MinecraftScreentime.sh`
-- After saving the file, you may get a popup "Terminal would like to administer your computer...". Click Allow.
-3. Grant cron full disk access:
-- Open System Settings
-- Click Privacy & Security
-- Click Full Disk Access
-- Click the + icon
-- Navigate to /usr/sbin/cron and click Open (hint: you may have to press Command+Shift+. to show hidden files)
+## Installation
 
-To check whether the script can run, you can launch it from the terminal directly
-- navigate to the directory where you installed it (e.g. `cd ~/Documents/git/screentime`)
-- run the script (e.g. `./MinecraftScreentime.sh`)
+### Step 1: Install the Monitor
+1. On your child's computer:
+   - Open Terminal (press Command+Space and type "Terminal")
+   - Copy and paste this command:
+     ```bash
+     curl -sL https://raw.githubusercontent.com/arohou/screentime/main/install.sh | bash
+     ```
+   - Follow the on-screen instructions when System Settings opens
 
-To check whether the script is run every minute by cron as expected, check the end of the log file:
-`tail -f ~/Library/Application\ Support/minecraft/logs/screentime.log` (to stop `tail`ing the file, use `Ctrl-C`)
+### Step 2: Set Up Remote Management
+For secure remote management of time limits, follow these steps on the PARENT'S device:
 
-### Time limit configuration
-The script ships with a default configuration file, called `MinecraftScreentime.txt` and located in the same directory as the script. You can edit that file to specify your own time limits, in minutes.
-For added convenience, the script will also look for a folder shared on iCloud called `MinecraftScreentimeConfig`. If this is found, and it contains a `MinecraftScreentime.txt` file, the time limits found in that file will take precedence.
-#### Creating a shared configuration file on iCloud
-You will need a text editor intalled on your device. For iOS, a good option is EasyEditText, which integrates with Files.
-On your (the parent's) device:
-- In Finder (MacOS) or the Files app (iOS), navigate to iCloud Drive
-- Create a new folder
-  - iOS
-    - Click on the three dots (top right of screen)
-    - Tap "New Folder"
-  - MacOS
-    - Right-Click
-    - New Folder
-- Name the folder `MinecraftScreentimeConfig`
-- Long tap (right click) on the folder, select Share
-- Select "Collaborate"
-- Tap on "Only invited people can edit" and change it to "Only invited people" and "View only" (that way your child will not be able to edit the time limit)
-- Invite your child to "collaborate" on this folder (e.g. via Messages)
-- Create a file `MinecraftScreentime.txt` within the folder, and add two lines to specify the limits (in minutes). Should look something like this:
-```
-WEEKDAY_LIMIT_MINUTES=60
-WEEKEND_LIMIT_MINUTES=120
-```
+1. Create the Configuration Folder:
+   - Open iCloud Drive on YOUR device (not your child's)
+   - Create a new folder named `MinecraftScreentimeConfig`
+   - Create a file `MinecraftScreentime.txt` inside this folder
+   - Add these lines to set your desired limits:
+     ```
+     WEEKDAY_LIMIT_MINUTES=60
+     WEEKEND_LIMIT_MINUTES=120
+     ```
+
+2. Share Securely with Your Child:
+   - Right-click the folder
+   - Select "Share" → "Collaborate"
+   - Important: Set permissions to:
+     - "Only invited people"
+     - "View only" (this prevents your child from editing)
+   - Share the invitation with your child (e.g., via Messages)
+
+3. Verify Setup:
+   - The folder should appear in your child's iCloud Drive
+   - Your child should not be able to edit the file
+   - Changes you make from your device will automatically apply
+
+### Changing Time Limits
+As a parent, you can change time limits at any time:
+1. On YOUR device, open the `MinecraftScreentime.txt` file in the shared folder
+2. Edit the numbers as needed
+3. Save the file
+4. Changes will apply within one minute on your child's computer
+
+### Security Features
+- Configuration can only be modified through the parent's shared folder
+- Local configuration files are protected with restricted permissions
+- Children cannot modify settings even with terminal access
+- All scripts and configuration files are stored in secure system directories
