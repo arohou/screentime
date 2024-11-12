@@ -50,6 +50,7 @@ launchctl load "$LAUNCH_AGENT_DIR/com.minecraft.screentime.plist"
 # Request Full Disk Access using automation
 echo "==============================================="
 echo "IMPORTANT: Full Disk Access Setup Required"
+echo "Follow the instructions below"
 echo "==============================================="
 echo "System Settings will now open. Please follow these steps:"
 echo "1. Click the '+' button"
@@ -64,8 +65,7 @@ read -r </dev/tty
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
 
 echo ""
-echo "Please grant Full Disk Access permission to bash."
-echo -n "Press Enter AFTER you have completed these steps..."
+echo -n "Press Enter after you have completed the steps above..."
 read -r </dev/tty
 
 echo "==============================================="
