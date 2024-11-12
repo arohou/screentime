@@ -57,14 +57,16 @@ echo "2. Press Command+Shift+G"
 echo "3. Enter: /bin/bash"
 echo "4. Click 'Open'"
 echo ""
-echo -n "Press Enter AFTER you have completed these steps..."
+echo -n "Press Enter when you're ready to begin..."
+read -r
 
 # Open System Settings to the correct location
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
 
-# Wait for Enter key
-read
-
+echo ""
+echo "Please grant Full Disk Access permission to bash."
+echo -n "Press Enter AFTER you have completed these steps..."
+read -r
 
 echo "==============================================="
 echo "Testing permissions..."
