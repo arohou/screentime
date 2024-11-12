@@ -55,3 +55,18 @@ As a parent, you can change time limits at any time:
 - Local configuration files are protected with restricted permissions
 - Children cannot modify settings even with terminal access
 - All scripts and configuration files are stored in secure system directories
+
+
+## Uninstallation
+
+To remove Minecraft Screentime:
+
+1. Download and run the uninstall script:
+```bash
+curl -sL https://raw.githubusercontent.com/arohou/screentime/main/uninstall.sh | bash
+```
+
+2. Optional cleanup steps:
+   - Remove the shared configuration folder from the parent's iCloud Drive
+   - Remove Full Disk Access permission for bash in System Settings if no longer needed
+
