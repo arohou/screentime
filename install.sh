@@ -58,7 +58,7 @@ echo "3. Enter: /bin/bash"
 echo "4. Click 'Open'"
 echo ""
 echo -n "Press Enter when you're ready to begin..."
-read -r
+read -r </dev/tty
 
 # Open System Settings to the correct location
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
@@ -66,7 +66,7 @@ open "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
 echo ""
 echo "Please grant Full Disk Access permission to bash."
 echo -n "Press Enter AFTER you have completed these steps..."
-read -r
+read -r </dev/tty
 
 echo "==============================================="
 echo "Testing permissions..."
@@ -78,7 +78,7 @@ if ! pmset -g log >/dev/null 2>&1; then
     echo "Please try the setup steps again."
     echo ""
     echo "Press Enter to continue anyway, or Ctrl+C to exit..."
-    read -r
+    read -r </dev/tty
 fi
 
 # Now show the configuration instructions
