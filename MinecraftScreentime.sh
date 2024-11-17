@@ -47,37 +47,47 @@ log() {
 for CONFIG_FILE in "$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE"; do
     if [ -f "$CONFIG_FILE" ]; then
         log "INFO" "Loading configuration from: $CONFIG_FILE"
-        # Source config file but only use known variables
-        while IFS='=' read -r key value; do
+        
+        # Read file into variable first (handles missing newline at EOF)
+        config_content=$(<"$CONFIG_FILE")
+        
+        # Process each line, using here-string to handle missing newline
+        while IFS='=' read -r key value || [ -n "$key" ]; do
             # Skip comments and empty lines
             [[ $key =~ ^[[:space:]]*# ]] && continue
             [[ -z "$key" ]] && continue
             
-            # Remove any surrounding whitespace and quotes
-            key=$(echo "$key" | tr -d ' ')
-            value=$(echo "$value" | tr -d ' "'"'")
+            # Remove any surrounding whitespace, quotes, and CR characters
+            key=$(echo "$key" | tr -d ' \r')
+            value=$(echo "$value" | tr -d ' "\r'"'')
             
-            # Add debug logging to track variable assignment
-            log "DEBUG" "Setting $key=$value"
+            # Skip if either key or value is empty after cleanup
+            [[ -z "$key" || -z "$value" ]] && continue
+            
+            # Validate that value is a positive integer
+            if ! [[ "$value" =~ ^[0-9]+$ ]]; then
+                log "WARNING" "Invalid value for $key: $value (must be a positive integer)"
+                continue
+            }
             
             case "$key" in
                 "WEEKDAY_LIMIT_MINUTES") 
                     WEEKDAY_LIMIT_MINUTES=$value
-                    log "DEBUG" "Updated weekday limit to: $WEEKDAY_LIMIT_MINUTES"
+                    #log "DEBUG" "Updated weekday limit to: $WEEKDAY_LIMIT_MINUTES"
                     ;;
                 "WEEKEND_LIMIT_MINUTES") 
                     WEEKEND_LIMIT_MINUTES=$value
-                    log "DEBUG" "Updated weekend limit to: $WEEKEND_LIMIT_MINUTES"
+                    #log "DEBUG" "Updated weekend limit to: $WEEKEND_LIMIT_MINUTES"
+                    ;;
+                *)
+                    log "WARNING" "Unknown configuration key: $key"
                     ;;
             esac
-        done < "$CONFIG_FILE"
+        done <<< "$config_content"
         
-        # Add verification logging after loading config
-        log "INFO" "After loading config - Weekday limit: $WEEKDAY_LIMIT_MINUTES, Weekend limit: $WEEKEND_LIMIT_MINUTES"
         break
     fi
 done
-
 
 
 #
