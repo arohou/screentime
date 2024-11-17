@@ -57,11 +57,23 @@ for CONFIG_FILE in "$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE"; do
             key=$(echo "$key" | tr -d ' ')
             value=$(echo "$value" | tr -d ' "'"'")
             
+            # Add debug logging to track variable assignment
+            log "DEBUG" "Setting $key=$value"
+            
             case "$key" in
-                "WEEKDAY_LIMIT_MINUTES") WEEKDAY_LIMIT_MINUTES=$value ;;
-                "WEEKEND_LIMIT_MINUTES") WEEKEND_LIMIT_MINUTES=$value ;;
+                "WEEKDAY_LIMIT_MINUTES") 
+                    WEEKDAY_LIMIT_MINUTES=$value
+                    log "DEBUG" "Updated weekday limit to: $WEEKDAY_LIMIT_MINUTES"
+                    ;;
+                "WEEKEND_LIMIT_MINUTES") 
+                    WEEKEND_LIMIT_MINUTES=$value
+                    log "DEBUG" "Updated weekend limit to: $WEEKEND_LIMIT_MINUTES"
+                    ;;
             esac
         done < "$CONFIG_FILE"
+        
+        # Add verification logging after loading config
+        log "INFO" "After loading config - Weekday limit: $WEEKDAY_LIMIT_MINUTES, Weekend limit: $WEEKEND_LIMIT_MINUTES"
         break
     fi
 done
