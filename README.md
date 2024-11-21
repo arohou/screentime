@@ -57,6 +57,10 @@ As a parent, you can change time limits at any time:
 - All scripts and configuration files are stored in secure system directories
 
 
+### Monitoring and debugging the script
+- To monitor the script's activity, check the log file at `$HOME/Library/Application Support/minecraft/logs/screentime.log`
+
+
 ## Uninstallation
 
 To remove Minecraft Screentime:
