@@ -105,8 +105,29 @@ echo "   - Select 'Share' → 'Collaborate'"
 echo "   - Set permissions to 'Only invited people' and 'View only'"
 echo "   - Share the invitation via Messages"
 echo ""
-echo "Current local time limits are:"
-echo "Weekdays (Mon-Thu): $(grep WEEKDAY_LIMIT_MINUTES "$APP_DIR/MinecraftScreentime.txt" | cut -d= -f2) minutes"
-echo "Weekends (Fri-Sun): $(grep WEEKEND_LIMIT_MINUTES "$APP_DIR/MinecraftScreentime.txt" | cut -d= -f2) minutes"
-echo ""
-echo "These limits will be overridden once you set up the shared iCloud configuration."
+
+# Check for and display current time limits
+ICLOUD_CONFIG="$HOME/Library/Mobile Documents/com~apple~CloudDocs/MinecraftScreentimeConfig/MinecraftScreentime.txt"
+LOCAL_CONFIG="$APP_DIR/MinecraftScreentime.txt"
+
+echo "Current time limits:"
+echo "-------------------"
+if [ -f "$ICLOUD_CONFIG" ]; then
+    echo "From iCloud configuration:"
+    weekday_limit=$(grep "^WEEKDAY_LIMIT_MINUTES=" "$ICLOUD_CONFIG" | cut -d= -f2)
+    weekend_limit=$(grep "^WEEKEND_LIMIT_MINUTES=" "$ICLOUD_CONFIG" | cut -d= -f2)
+    if [ -n "$weekday_limit" ] || [ -n "$weekend_limit" ]; then
+        [ -n "$weekday_limit" ] && echo "Weekdays (Mon-Thu): $weekday_limit minutes"
+        [ -n "$weekend_limit" ] && echo "Weekends (Fri-Sun): $weekend_limit minutes"
+    else
+        echo "iCloud configuration file found but no limits specified"
+    fi
+else
+    echo "From local configuration:"
+    weekday_limit=$(grep "^WEEKDAY_LIMIT_MINUTES=" "$LOCAL_CONFIG" | cut -d= -f2)
+    weekend_limit=$(grep "^WEEKEND_LIMIT_MINUTES=" "$LOCAL_CONFIG" | cut -d= -f2)
+    echo "Weekdays (Mon-Thu): ${weekday_limit:-60} minutes"
+    echo "Weekends (Fri-Sun): ${weekend_limit:-120} minutes"
+    echo ""
+    echo "Note: These local limits will be overridden once you set up the shared iCloud configuration."
+fi
