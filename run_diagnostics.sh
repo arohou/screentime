@@ -47,7 +47,7 @@ extract_mc_root() {
         # Try to download MinecraftScreentime.sh if not found locally
         mc_script=$(mktemp)
         curl -s "https://raw.githubusercontent.com/arohou/screentime/main/MinecraftScreentime.sh" > "$mc_script"
-    }
+    fi
     
     # Extract MC_ROOT from MinecraftScreentime.sh
     MC_ROOT=$(grep 'MC_ROOT=' "$mc_script" | head -1 | cut -d'=' -f2- | tr -d '"')
