@@ -63,6 +63,11 @@ echo
 extract_paths_from_install
 extract_mc_root
 
+# Define iCloud paths
+ICLOUD_BASE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
+CONFIG_DIR="$ICLOUD_BASE/MinecraftScreentimeConfig"
+USAGE_DIR="$ICLOUD_BASE/MinecraftUsageLogs"
+
 # Verify that we got the paths
 if [ -z "$APP_DIR" ] || [ -z "$LAUNCH_AGENT_DIR" ] || [ -z "$MC_ROOT" ]; then
     echo "${RED}ERROR: Failed to extract required paths from source scripts${NC}"
@@ -96,7 +101,7 @@ for script in "MinecraftScreentime.sh" "SleepTime.sh"; do
 done
 
 # 3. Check configuration file
-test_name="Configuration File"
+test_name="Local Configuration File"
 if [ -f "$APP_DIR/MinecraftScreentime.txt" ]; then
     perms=$(stat -f "%Sp" "$APP_DIR/MinecraftScreentime.txt")
     if [ "$perms" = "-r--------" ]; then
@@ -138,51 +143,93 @@ else
     print_status "$test_name" "FAIL" "Log directory not found"
 fi
 
-# Check for today's log file
-test_name="Today's Log File"
-TODAY=$(date +%Y%m%d)
-if [ -f "$MC_ROOT/logs/screentime_$TODAY.log" ]; then
-    last_modified=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$MC_ROOT/logs/screentime_$TODAY.log")
-    print_status "$test_name" "PASS" "Today's log exists (Last modified: $last_modified)"
-else
-    print_status "$test_name" "FAIL" "No log file for today"
-fi
-
-# 7. Check main log file and recent entries
-test_name="Main Log File"
-MAIN_LOG="$MC_ROOT/logs/screentime.log"
-if [ -f "$MAIN_LOG" ]; then
-    last_modified=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$MAIN_LOG")
-    recent_entries=$(tail -n 5 "$MAIN_LOG" 2>/dev/null)
-    if [ -n "$recent_entries" ]; then
-        print_status "$test_name" "PASS" "Log file exists and contains entries (Last modified: $last_modified)"
-        echo "Recent log entries:"
-        echo "-------------------"
-        echo "$recent_entries"
+# 7. Check iCloud Configuration Directory
+test_name="iCloud Configuration Directory"
+if [ -d "$CONFIG_DIR" ]; then
+    print_status "$test_name" "PASS" "iCloud configuration directory exists"
+    
+    # Check configuration file
+    if [ -f "$CONFIG_DIR/MinecraftScreentime.txt" ]; then
+        echo "Current limits in iCloud config:"
+        grep -E "^(WEEKDAY|WEEKEND)_LIMIT_MINUTES=" "$CONFIG_DIR/MinecraftScreentime.txt" || echo "No limits found in file"
         echo
     else
-        print_status "$test_name" "FAIL" "Log file exists but appears empty"
+        print_status "iCloud Configuration File" "FAIL" "Configuration file not found in iCloud directory"
     fi
 else
-    print_status "$test_name" "FAIL" "Main log file not found"
+    print_status "$test_name" "FAIL" "iCloud configuration directory not found"
 fi
 
-# 8. Check iCloud configuration
-test_name="iCloud Configuration"
-ICLOUD_CONFIG="$HOME/Library/Mobile Documents/com~apple~CloudDocs/MinecraftScreentimeConfig/MinecraftScreentime.txt"
-if [ -f "$ICLOUD_CONFIG" ]; then
-    print_status "$test_name" "PASS" "iCloud configuration file found"
-    echo "Current limits in iCloud config:"
-    grep -E "^(WEEKDAY|WEEKEND)_LIMIT_MINUTES=" "$ICLOUD_CONFIG" || echo "No limits found in file"
+# 8. Check iCloud Usage Logs Directory
+test_name="iCloud Usage Logs Directory"
+if [ -d "$USAGE_DIR" ]; then
+    print_status "$test_name" "PASS" "iCloud usage logs directory exists"
+    
+    # Check for today's usage log
+    TODAY=$(date +%Y%m%d)
+    USERNAME=$(whoami)
+    TODAY_LOG="$USAGE_DIR/${USERNAME}_${TODAY}.txt"
+    
+    if [ -f "$TODAY_LOG" ]; then
+        echo "Today's usage log content:"
+        cat "$TODAY_LOG"
+        echo
+    else
+        echo "No usage log found for today (this is normal if Minecraft hasn't been played today)"
+        echo
+    fi
+    
+    # Show recent usage logs
+    echo "Recent usage logs:"
+    ls -lt "$USAGE_DIR" | head -n 5
     echo
 else
-    print_status "$test_name" "FAIL" "iCloud configuration file not found"
+    print_status "$test_name" "FAIL" "iCloud usage logs directory not found"
 fi
 
-# 9. Check Full Disk Access
+# 9. Check iCloud directory permissions
+test_name="iCloud Directory Permissions"
+check_icloud_permissions() {
+    local dir="$1"
+    local expected_access="$2"
+    
+    if [ -d "$dir" ]; then
+        if [ -w "$dir" = "$expected_access" ]; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+    return 2
+}
+
+# Check config directory (should be read-only)
+if check_icloud_permissions "$CONFIG_DIR" "false"; then
+    print_status "Config Directory Permissions" "PASS" "Configuration directory is read-only as expected"
+else
+    print_status "Config Directory Permissions" "FAIL" "Configuration directory has incorrect permissions"
+fi
+
+# Check usage directory (should be writable)
+if check_icloud_permissions "$USAGE_DIR" "true"; then
+    print_status "Usage Directory Permissions" "PASS" "Usage logs directory is writable as expected"
+else
+    print_status "Usage Directory Permissions" "FAIL" "Usage logs directory has incorrect permissions"
+fi
+
+# 10. Check Full Disk Access
 test_name="Full Disk Access"
 if pmset -g log >/dev/null 2>&1; then
     print_status "$test_name" "PASS" "Full Disk Access appears to be granted"
 else
     print_status "$test_name" "FAIL" "Full Disk Access appears to be missing"
 fi
+
+# Display overall system status
+echo "==============================================="
+echo "Overall System Status"
+echo "==============================================="
+echo "1. Basic installation appears to be $([ -d "$APP_DIR" ] && echo "${GREEN}complete${NC}" || echo "${RED}incomplete${NC}")"
+echo "2. iCloud configuration is $([ -f "$CONFIG_DIR/MinecraftScreentime.txt" ] && echo "${GREEN}set up${NC}" || echo "${RED}missing${NC}")"
+echo "3. Usage logging is $([ -d "$USAGE_DIR" ] && echo "${GREEN}enabled${NC}" || echo "${RED}not configured${NC}")"
+echo "4. Automated monitoring is $(launchctl list | grep -q "com.minecraft.screentime" && echo "${GREEN}running${NC}" || echo "${RED}stopped${NC}")"

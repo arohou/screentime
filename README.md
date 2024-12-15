@@ -18,29 +18,35 @@ There are two time limits - one for Monday-Thursday, the other for Friday-Sunday
    - Follow the on-screen instructions when System Settings opens
 
 ### Step 2: Set Up Remote Management
-For secure remote management of time limits, follow these steps on the PARENT'S device:
+For secure remote management, follow these steps on the PARENT'S device:
 
-1. Create the Configuration Folder:
-   - Open iCloud Drive on YOUR device (not your child's)
-   - Create a new folder named `MinecraftScreentimeConfig`
-   - Create a file `MinecraftScreentime.txt` inside this folder
-   - Add these lines to set your desired limits:
-     ```
-     WEEKDAY_LIMIT_MINUTES=60
-     WEEKEND_LIMIT_MINUTES=120
-     ```
+1. Create Two iCloud Folders:
+   a. Configuration Folder (Read-Only):
+      - Create folder `MinecraftScreentimeConfig`
+      - Create file `MinecraftScreentime.txt` inside with:
+        ```
+        WEEKDAY_LIMIT_MINUTES=60
+        WEEKEND_LIMIT_MINUTES=120
+        ```
+      - Share as read-only:
+        - Right-click folder → Share → Collaborate
+        - Set to "Only invited people" and "View only"
+   
+   b. Usage Logs Folder (Read-Write):
+      - Create folder `MinecraftUsageLogs`
+      - Share with read-write access:
+        - Right-click folder → Share → Collaborate
+        - Set to "Only invited people" and "Can make changes"
 
-2. Share Securely with Your Child:
-   - Right-click the folder
-   - Select "Share" → "Collaborate"
-   - Important: Set permissions to:
-     - "Only invited people"
-     - "View only" (this prevents your child from editing)
-   - Share the invitation with your child (e.g., via Messages)
+2. Share Both Folders:
+   - Send invitations to your child via Messages
+   - Ensure your child accepts both invitations
+   - Verify the folders appear in their iCloud Drive
+
 
 3. Verify Setup:
-   - The folder should appear in your child's iCloud Drive
-   - Your child should not be able to edit the file
+   - The folders should appear in your child's iCloud Drive
+   - Your child should not be able to edit the configuration file
    - Changes you make from your device will automatically apply
 
 ### Changing Time Limits
@@ -50,13 +56,23 @@ As a parent, you can change time limits at any time:
 3. Save the file
 4. Changes will apply within one minute on your child's computer
 
+### Monitoring Usage
+You can monitor your child's Minecraft usage:
+1. Open the `MinecraftUsageLogs` folder in iCloud Drive
+2. Look for files named `username_YYYYMMDD.txt`
+3. Each file contains:
+   - Last update timestamp
+   - Total play time for the day
+   - Detailed session information
+
 ### Security Features
 - Configuration can only be modified through the parent's shared folder
+- Usage logs are stored in a separate shared folder with appropriate permissions
 - Local configuration files are protected with restricted permissions
 - Children cannot modify settings even with terminal access
 - All scripts and configuration files are stored in secure system directories
 
-### Monitoring and Troubleshooting
+### Troubleshooting
 
 #### Running Diagnostics
 To check if everything is set up correctly and diagnose any issues:

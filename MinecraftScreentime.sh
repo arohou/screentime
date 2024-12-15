@@ -23,13 +23,15 @@ WEEKEND_LIMIT_MINUTES=120  # Friday through Sunday
 # Define config file locations
 SCRIPT_DIR="$(dirname "$0")"
 LOCAL_CONFIG_FILE="$SCRIPT_DIR/MinecraftScreentime.txt"
-SHARED_ICLOUD_CONFIG_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/MinecraftScreentimeConfig"
+SHARED_ICLOUD_BASE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
+SHARED_ICLOUD_CONFIG_DIR="$SHARED_ICLOUD_BASE/MinecraftScreentimeConfig"
 SHARED_ICLOUD_CONFIG_FILE="$SHARED_ICLOUD_CONFIG_DIR/MinecraftScreentime.txt"
+SHARED_ICLOUD_USAGE_DIR="$SHARED_ICLOUD_BASE/MinecraftUsageLogs"
 
 # Define iCloud usage log location
 USERNAME=$(whoami)
 TODAY=$(date +%Y%m%d)
-ICLOUD_USAGE_LOG="$SHARED_ICLOUD_CONFIG_DIR/usage_${USERNAME}_${TODAY}.txt"
+ICLOUD_USAGE_LOG="$SHARED_ICLOUD_USAGE_DIR/usage_${USERNAME}_${TODAY}.txt"
 
 # Other configurations
 MC_ROOT="$HOME/Library/Application Support/minecraft"
@@ -53,7 +55,10 @@ update_icloud_usage() {
     local total_time="$1"
     local using_icloud="$2"
     
-    if [ "$using_icloud" = "true" ] && [ -d "$SHARED_ICLOUD_CONFIG_DIR" ]; then
+    if [ "$using_icloud" = "true" ]; then
+        # Ensure usage directory exists
+        mkdir -p "$SHARED_USAGE_DIR"
+        
         # Convert seconds to hours and minutes
         local hours=$((total_time / 3600))
         local minutes=$(((total_time % 3600) / 60))
