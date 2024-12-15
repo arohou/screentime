@@ -59,7 +59,7 @@ for CONFIG_FILE in "$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE"; do
             
             # Remove any surrounding whitespace, quotes, and CR characters
             key=$(echo "$key" | tr -d ' \r')
-            value=$(echo "$value" | tr -d ' "\r'"'')
+            value=$(echo "$value" | tr -d ' \r')
             
             # Skip if either key or value is empty after cleanup
             [[ -z "$key" || -z "$value" ]] && continue
@@ -68,7 +68,7 @@ for CONFIG_FILE in "$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE"; do
             if ! [[ "$value" =~ ^[0-9]+$ ]]; then
                 log "WARNING" "Invalid value for $key: $value (must be a positive integer)"
                 continue
-            }
+            fi
             
             case "$key" in
                 "WEEKDAY_LIMIT_MINUTES") 
