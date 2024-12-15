@@ -193,14 +193,20 @@ check_icloud_permissions() {
     local dir="$1"
     local expected_access="$2"
     
-    if [ -d "$dir" ]; then
-        if [ -w "$dir" = "$expected_access" ]; then
+    if [ ! -d "$dir" ]; then
+        return 2
+    fi
+    
+    if [ "$expected_access" = "true" ]; then
+        if [ -w "$dir" ]; then
             return 0
-        else
-            return 1
+        fi
+    else
+        if [ ! -w "$dir" ]; then
+            return 0
         fi
     fi
-    return 2
+    return 1
 }
 
 # Check config directory (should be read-only)
