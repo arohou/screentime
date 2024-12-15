@@ -23,7 +23,13 @@ WEEKEND_LIMIT_MINUTES=120  # Friday through Sunday
 # Define config file locations
 SCRIPT_DIR="$(dirname "$0")"
 LOCAL_CONFIG_FILE="$SCRIPT_DIR/MinecraftScreentime.txt"
-SHARED_ICLOUD_CONFIG_FILE="$HOME/Library/Mobile Documents/com~apple~CloudDocs/MinecraftScreentimeConfig/MinecraftScreentime.txt"
+SHARED_ICLOUD_CONFIG_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/MinecraftScreentimeConfig"
+SHARED_ICLOUD_CONFIG_FILE="$SHARED_ICLOUD_CONFIG_DIR/MinecraftScreentime.txt"
+
+# Define iCloud usage log location
+USERNAME=$(whoami)
+TODAY=$(date +%Y%m%d)
+ICLOUD_USAGE_LOG="$SHARED_ICLOUD_CONFIG_DIR/usage_${USERNAME}_${TODAY}.txt"
 
 # Other configurations
 MC_ROOT="$HOME/Library/Application Support/minecraft"
@@ -42,11 +48,48 @@ log() {
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] [$level] $*" >> "$MC_ROOT/logs/screentime.log"
 }
 
+# Function to update iCloud usage log
+update_icloud_usage() {
+    local total_time="$1"
+    local using_icloud="$2"
+    
+    if [ "$using_icloud" = "true" ] && [ -d "$SHARED_ICLOUD_CONFIG_DIR" ]; then
+        # Convert seconds to hours and minutes
+        local hours=$((total_time / 3600))
+        local minutes=$(((total_time % 3600) / 60))
+        local last_update=$(date +'%Y-%m-%d %H:%M:%S')
+        
+        # Create or update the usage log file
+        cat > "$ICLOUD_USAGE_LOG" << EOL
+Last Updated: $last_update
+Total Play Time: ${hours}h ${minutes}m
+Total Seconds: $total_time
+EOL
+        
+        log "INFO" "Updated iCloud usage log: ${hours}h ${minutes}m"
+    fi
+}
+
+# Function to clean up old logs
+cleanup_old_logs() {
+    # Clean up local logs
+    find "$MC_ROOT/logs" -name "screentime_*.log" -mtime +"$LOG_RETENTION_DAYS" -delete
+    find "$MC_ROOT/logs" -name "screentime.log" -mtime +"$LOG_RETENTION_DAYS" -delete
+    
+    # Clean up iCloud logs if the directory exists
+    if [ -d "$SHARED_ICLOUD_CONFIG_DIR" ]; then
+        # Find and delete old usage logs
+        find "$SHARED_ICLOUD_CONFIG_DIR" -name "usage_${USERNAME}_*.txt" -mtime +"$LOG_RETENTION_DAYS" -delete 2>/dev/null
+        log "INFO" "Cleaned up old iCloud usage logs"
+    fi
+}
 
 # Try to load config file from different locations in order of preference
+USING_ICLOUD=false
 for CONFIG_FILE in "$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE"; do
     if [ -f "$CONFIG_FILE" ]; then
         log "INFO" "Loading configuration from: $CONFIG_FILE"
+        [ "$CONFIG_FILE" = "$SHARED_ICLOUD_CONFIG_FILE" ] && USING_ICLOUD=true
         
         # Read file into variable first (handles missing newline at EOF)
         config_content=$(<"$CONFIG_FILE")
@@ -73,11 +116,9 @@ for CONFIG_FILE in "$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE"; do
             case "$key" in
                 "WEEKDAY_LIMIT_MINUTES") 
                     WEEKDAY_LIMIT_MINUTES=$value
-                    #log "DEBUG" "Updated weekday limit to: $WEEKDAY_LIMIT_MINUTES"
                     ;;
                 "WEEKEND_LIMIT_MINUTES") 
                     WEEKEND_LIMIT_MINUTES=$value
-                    #log "DEBUG" "Updated weekend limit to: $WEEKEND_LIMIT_MINUTES"
                     ;;
                 *)
                     log "WARNING" "Unknown configuration key: $key"
@@ -89,11 +130,7 @@ for CONFIG_FILE in "$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE"; do
     fi
 done
 
-
-#
 # Helper functions
-#
-
 display_notification() {
     local msg="$1"
     local icon="${2:-caution}"
@@ -115,17 +152,6 @@ get_active_runtime() {
     local active_time=$((runtime - sleep_seconds))
     echo "${active_time:-0}"
 }
-
-cleanup_old_logs() {
-    find "$MC_ROOT/logs" -name "screentime_*.log" -mtime +"$LOG_RETENTION_DAYS" -delete
-    find "$MC_ROOT/logs" -name "screentime.log" -mtime +"$LOG_RETENTION_DAYS" -delete
-}
-
-#
-# Main script
-#
-
-
 
 # Import the get_sleep_time_since function
 source "$(dirname "$0")/SleepTime.sh"
@@ -152,8 +178,6 @@ fi
 SCREENTIME_LIMIT_SECONDS=$((SCREENTIME_LIMIT_MINUTES * 60))
 
 # Setup today's log file
-TODAY=$(date +%Y%m%d)
-# Set the path to the Minecraft screentime log file
 # The format of the file is:
 # one line per java process
 # first word: PID of the java process
@@ -194,6 +218,10 @@ if [ -n "$MC_PID" ]; then
     if [ -f "$MC_SCREENTIME_LOG" ]; then
         TOTAL_SCREENTIME=$(awk '{ sum += $2 } END { print sum }' "$MC_SCREENTIME_LOG")
     fi
+
+    # Update iCloud usage log if using iCloud configuration
+    update_icloud_usage "$TOTAL_SCREENTIME" "$USING_ICLOUD"
+    
     # If the screentime limit is greater than zero, and Minecraft is running, we may need to act
     if [ "$SCREENTIME_LIMIT_SECONDS" -gt 0 ]; then
         SECONDS_LEFT=$((SCREENTIME_LIMIT_SECONDS - TOTAL_SCREENTIME))
