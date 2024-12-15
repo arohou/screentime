@@ -56,10 +56,32 @@ As a parent, you can change time limits at any time:
 - Children cannot modify settings even with terminal access
 - All scripts and configuration files are stored in secure system directories
 
+### Monitoring and Troubleshooting
 
-### Monitoring and debugging the script
+#### Running Diagnostics
+To check if everything is set up correctly and diagnose any issues:
+
+1. Download and run the diagnostics script:
+   ```bash
+   curl -sL https://raw.githubusercontent.com/arohou/screentime/main/run_diagnostics.sh | bash
+   ```
+
+2. The diagnostics tool will check:
+   - Installation directory and file permissions
+   - LaunchAgent configuration and status
+   - Log files and recent entries
+   - iCloud configuration
+   - Full Disk Access permissions
+   - Current time limits and settings
+
+3. The output will show:
+   - ✓ PASS in green for correctly configured components
+   - ✗ FAIL in red for items that need attention
+   - Recent log entries and current settings
+   - Detailed information about any issues found
+
+#### Checking Logs
 - To monitor the script's activity, check the log file at `$HOME/Library/Application Support/minecraft/logs/screentime.log`
-
 
 ## Uninstallation
 
@@ -73,4 +95,3 @@ curl -sL https://raw.githubusercontent.com/arohou/screentime/main/uninstall.sh |
 2. Optional cleanup steps:
    - Remove the shared configuration folder from the parent's iCloud Drive
    - Remove Full Disk Access permission for bash in System Settings if no longer needed
-
