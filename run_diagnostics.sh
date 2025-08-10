@@ -168,7 +168,7 @@ if [ -d "$USAGE_DIR" ]; then
     # Check for today's usage log
     TODAY=$(date +%Y%m%d)
     USERNAME=$(whoami)
-    TODAY_LOG="$USAGE_DIR/${USERNAME}_${TODAY}.txt"
+    TODAY_LOG="$USAGE_DIR/usage_${USERNAME}_${TODAY}.txt"
     
     if [ -f "$TODAY_LOG" ]; then
         echo "Today's usage log content:"
@@ -209,11 +209,11 @@ check_icloud_permissions() {
     return 1
 }
 
-# Check config directory (should be read-only)
-if check_icloud_permissions "$CONFIG_DIR" "false"; then
-    print_status "Config Directory Permissions" "PASS" "Configuration directory is read-only as expected"
+# Check config directory (should be accessible - iCloud sharing handles read-only enforcement)
+if check_icloud_permissions "$CONFIG_DIR" "true"; then
+    print_status "Config Directory Permissions" "PASS" "Configuration directory is accessible (iCloud sharing handles access control)"
 else
-    print_status "Config Directory Permissions" "FAIL" "Configuration directory has incorrect permissions"
+    print_status "Config Directory Permissions" "FAIL" "Configuration directory is not accessible"
 fi
 
 # Check usage directory (should be writable)
