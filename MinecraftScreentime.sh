@@ -20,18 +20,60 @@ fi
 WEEKDAY_LIMIT_MINUTES=60   # Monday through Thursday
 WEEKEND_LIMIT_MINUTES=120  # Friday through Sunday
 
+# Function to detect iCloud Drive path dynamically
+detect_icloud_path() {
+    local icloud_candidates=(
+        "$HOME/Library/Mobile Documents/com~apple~CloudDocs"
+        "$HOME/Library/Mobile Documents/iCloud~com~apple~CloudDocs"
+        "$HOME/Mobile Documents/com~apple~CloudDocs"
+    )
+    
+    for path in "${icloud_candidates[@]}"; do
+        if [ -d "$path" ] && [ -w "$path" ]; then
+            echo "$path"
+            return 0
+        fi
+    done
+    
+    # If no standard path works, try to find it using mdfind
+    local found_path
+    found_path=$(mdfind "kMDItemDisplayName == 'com~apple~CloudDocs'" 2>/dev/null | head -1)
+    if [ -n "$found_path" ] && [ -d "$found_path" ] && [ -w "$found_path" ]; then
+        echo "$found_path"
+        return 0
+    fi
+    
+    # Return empty string if no valid iCloud path found
+    echo ""
+    return 1
+}
+
 # Define config file locations
 SCRIPT_DIR="$(dirname "$0")"
 LOCAL_CONFIG_FILE="$SCRIPT_DIR/MinecraftScreentime.txt"
-SHARED_ICLOUD_BASE="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
-SHARED_ICLOUD_CONFIG_DIR="$SHARED_ICLOUD_BASE/MinecraftScreentimeConfig"
-SHARED_ICLOUD_CONFIG_FILE="$SHARED_ICLOUD_CONFIG_DIR/MinecraftScreentime.txt"
-SHARED_ICLOUD_USAGE_DIR="$SHARED_ICLOUD_BASE/MinecraftUsageLogs"
+
+# Detect iCloud Drive path dynamically
+SHARED_ICLOUD_BASE=$(detect_icloud_path)
+if [ -n "$SHARED_ICLOUD_BASE" ]; then
+    SHARED_ICLOUD_CONFIG_DIR="$SHARED_ICLOUD_BASE/MinecraftScreentimeConfig"
+    SHARED_ICLOUD_CONFIG_FILE="$SHARED_ICLOUD_CONFIG_DIR/MinecraftScreentime.txt"
+    SHARED_ICLOUD_USAGE_DIR="$SHARED_ICLOUD_BASE/MinecraftUsageLogs"
+    log "INFO" "Using iCloud Drive path: $SHARED_ICLOUD_BASE"
+else
+    SHARED_ICLOUD_CONFIG_DIR=""
+    SHARED_ICLOUD_CONFIG_FILE=""
+    SHARED_ICLOUD_USAGE_DIR=""
+    log "WARNING" "iCloud Drive path not found - iCloud features will be disabled"
+fi
 
 # Define iCloud usage log location
 USERNAME=$(whoami)
 TODAY=$(date +%Y%m%d)
-ICLOUD_USAGE_LOG="$SHARED_ICLOUD_USAGE_DIR/usage_${USERNAME}_${TODAY}.txt"
+if [ -n "$SHARED_ICLOUD_USAGE_DIR" ]; then
+    ICLOUD_USAGE_LOG="$SHARED_ICLOUD_USAGE_DIR/usage_${USERNAME}_${TODAY}.txt"
+else
+    ICLOUD_USAGE_LOG=""
+fi
 
 # Other configurations
 MC_ROOT="$HOME/Library/Application Support/minecraft"
@@ -55,9 +97,9 @@ update_icloud_usage() {
     local total_time="$1"
     local using_icloud="$2"
     
-    if [ "$using_icloud" = "true" ]; then
+    if [ "$using_icloud" = "true" ] && [ -n "$SHARED_ICLOUD_USAGE_DIR" ]; then
         # Ensure usage directory exists
-        mkdir -p "$SHARED_USAGE_DIR"
+        mkdir -p "$SHARED_ICLOUD_USAGE_DIR"
         
         # Convert seconds to hours and minutes
         local hours=$((total_time / 3600))
@@ -91,7 +133,12 @@ cleanup_old_logs() {
 
 # Try to load config file from different locations in order of preference
 USING_ICLOUD=false
-for CONFIG_FILE in "$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE"; do
+CONFIG_FILES=("$LOCAL_CONFIG_FILE")
+if [ -n "$SHARED_ICLOUD_CONFIG_FILE" ]; then
+    CONFIG_FILES=("$SHARED_ICLOUD_CONFIG_FILE" "$LOCAL_CONFIG_FILE")
+fi
+
+for CONFIG_FILE in "${CONFIG_FILES[@]}"; do
     if [ -f "$CONFIG_FILE" ]; then
         log "INFO" "Loading configuration from: $CONFIG_FILE"
         [ "$CONFIG_FILE" = "$SHARED_ICLOUD_CONFIG_FILE" ] && USING_ICLOUD=true
