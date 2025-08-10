@@ -65,6 +65,31 @@ You can monitor your child's Minecraft usage:
    - Total play time for the day
    - Detailed session information
 
+## Updating to the Latest Version
+
+To update Minecraft Screentime to the latest version:
+
+1. **Simple Update Method:**
+   ```bash
+   curl -sL https://raw.githubusercontent.com/arohou/screentime/main/install.sh | bash
+   ```
+   - This will download and install the latest version
+   - Your existing configuration and settings will be preserved
+   - The script automatically replaces old files with new ones
+
+2. **What gets updated:**
+   - Main monitoring script (`MinecraftScreentime.sh`)
+   - Sleep monitoring script (`SleepTime.sh`)
+   - Default configuration file (if no iCloud config exists)
+
+3. **What stays the same:**
+   - Your iCloud configuration folders and settings
+   - Usage logs and history
+   - LaunchAgent configuration
+   - Full Disk Access permissions
+
+4. **No need to uninstall first** - the install script handles updating existing installations
+
 ### Security Features
 - Configuration can only be modified through the parent's shared folder
 - Usage logs are stored in a separate shared folder with appropriate permissions
