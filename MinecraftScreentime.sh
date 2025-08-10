@@ -124,9 +124,9 @@ cleanup_old_logs() {
     find "$MC_ROOT/logs" -name "screentime.log" -mtime +"$LOG_RETENTION_DAYS" -delete
     
     # Clean up iCloud logs if the directory exists
-    if [ -d "$SHARED_ICLOUD_CONFIG_DIR" ]; then
+    if [ -d "$SHARED_ICLOUD_USAGE_DIR" ]; then
         # Find and delete old usage logs
-        find "$SHARED_ICLOUD_CONFIG_DIR" -name "usage_${USERNAME}_*.txt" -mtime +"$LOG_RETENTION_DAYS" -delete 2>/dev/null
+        find "$SHARED_ICLOUD_USAGE_DIR" -name "usage_${USERNAME}_*.txt" -mtime +"$LOG_RETENTION_DAYS" -delete 2>/dev/null
         log "INFO" "Cleaned up old iCloud usage logs"
     fi
 }
