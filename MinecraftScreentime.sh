@@ -131,6 +131,42 @@ cleanup_old_logs() {
     fi
 }
 
+# Helper functions
+display_notification() {
+    local msg="$1"
+    local icon="${2:-caution}"
+    osascript -e "display dialog \"$msg\" buttons \"OK\" default button 1 with title \"Minecraft\" with icon $icon" &> /dev/null || true
+}
+
+get_active_runtime() {
+    local pid="$1"
+    local start_time="$2"
+    
+    # Get wall clock runtime
+    local runtime=$(ps -p "$pid" -oetime= | tr '-' ':' | awk -F: '{ total=0; m=1; } { for (i=0; i < NF; i++) {total += $(NF-i)*m; m *= i >= 2 ? 24 : 60 }} {print total}')
+    
+    # Get sleep time
+    local sleep_time=$(get_sleep_time_since "$start_time")
+    local sleep_seconds=$(echo "$sleep_time" | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
+    
+    # Calculate active runtime
+    local active_time=$((runtime - sleep_seconds))
+    echo "${active_time:-0}"
+}
+
+# Import the get_sleep_time_since function
+source "$(dirname "$0")/SleepTime.sh"
+
+# Verify OS compatibility
+if [ "$(uname)" != "Darwin" ]; then
+    log "ERROR" "This script only works on MacOS"
+    exit 1
+fi
+
+# Clean up old logs
+cleanup_old_logs
+
+# Load configuration from files BEFORE determining limits
 # Try to load config file from different locations in order of preference
 USING_ICLOUD=false
 CONFIG_FILES=("$LOCAL_CONFIG_FILE")
@@ -182,42 +218,7 @@ for CONFIG_FILE in "${CONFIG_FILES[@]}"; do
     fi
 done
 
-# Helper functions
-display_notification() {
-    local msg="$1"
-    local icon="${2:-caution}"
-    osascript -e "display dialog \"$msg\" buttons \"OK\" default button 1 with title \"Minecraft\" with icon $icon" &> /dev/null || true
-}
-
-get_active_runtime() {
-    local pid="$1"
-    local start_time="$2"
-    
-    # Get wall clock runtime
-    local runtime=$(ps -p "$pid" -oetime= | tr '-' ':' | awk -F: '{ total=0; m=1; } { for (i=0; i < NF; i++) {total += $(NF-i)*m; m *= i >= 2 ? 24 : 60 }} {print total}')
-    
-    # Get sleep time
-    local sleep_time=$(get_sleep_time_since "$start_time")
-    local sleep_seconds=$(echo "$sleep_time" | awk -F: '{ print ($1 * 3600) + ($2 * 60) + $3 }')
-    
-    # Calculate active runtime
-    local active_time=$((runtime - sleep_seconds))
-    echo "${active_time:-0}"
-}
-
-# Import the get_sleep_time_since function
-source "$(dirname "$0")/SleepTime.sh"
-
-# Verify OS compatibility
-if [ "$(uname)" != "Darwin" ]; then
-    log "ERROR" "This script only works on MacOS"
-    exit 1
-fi
-
-# Clean up old logs
-cleanup_old_logs
-
-# Determine today's limit based on the day of week
+# Determine today's limit based on the day of week (AFTER loading config)
 DAY_OF_WEEK=$(date +%u)
 if [ "$DAY_OF_WEEK" -ge 5 ]; then
     SCREENTIME_LIMIT_MINUTES=$WEEKEND_LIMIT_MINUTES
